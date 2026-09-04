@@ -1,0 +1,19 @@
+# 依赖：约 104 MB，靠 npm install 还原，不进版本库
+# （所以从 git 克隆之后必须先跑一次 测试台\安装.bat）
+node_modules/
+
+# 本机专属：记着这台机器用哪个 EE 仓库、克隆在哪。
+# 换机器要重新跑《设置.bat》生成，不该跟着仓库走。
+送进编辑器/配置.json
+
+# 临时/系统垃圾
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+*.stackdump
+
+# ★ 凭据从来不在这个仓库里，无需忽略：
+#   EE 凭据  → %USERPROFILE%\.config\earthengine\credentials
+#   git 凭据 → %USERPROFILE%\.gitcookies
+#   这是刻意的设计——克隆或分享本仓库不会泄露任何人的账号。

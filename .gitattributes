@@ -1,0 +1,16 @@
+# 让行尾跨平台确定下来。
+#
+# ★ 为什么必须有这一条：.bat 在 Windows 上**必须是 CRLF**。
+#   如果别人在 Mac/Linux 上克隆再拷回 Windows，没有这条规则 .bat 会变成 LF，
+#   cmd 解析批处理时会出各种莫名其妙的问题。
+* text=auto
+*.bat text eol=crlf
+
+# 说明：这里只管**行尾**，不管**编码**。
+# 测试台\配置.txt 和 测试台\安装.bat 是 GBK 编码，
+# git 不会去动它们的字节（GBK 的多字节里不会出现 0x0A，所以行尾转换是安全的）。
+# 编码规则见 测试台\说明.md 的「坑 7」。
+
+# 让 GitHub 的语言统计不被 node_modules 之外的示例脚本带偏，
+# 并把这些当成"文档/数据"而不是"源码"来看待。
+示例脚本/** linguist-documentation

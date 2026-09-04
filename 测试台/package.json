@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@google/earthengine": "^1.7.40",
+    "https-proxy-agent": "^9.1.0"
+  }
+}
