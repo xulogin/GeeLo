@@ -10,14 +10,23 @@ description: Use when writing, debugging, or running Google Earth Engine (GEE) J
 波段名、集合是不是空的、归约器要几个输入、行政区在数据集里叫什么——
 `node --check` 全过，只有真连服务器才暴露。GeeLo 让你自己去跑。
 
-工具在 `${CLAUDE_PLUGIN_ROOT}`，下面所有命令直接用这个变量，**不要问用户路径**。
+## 工具在哪（下面写 `<GeeLo>` 的地方全指它）
+
+**`<GeeLo>` = 本文件所在目录的上两级**（本文件是 `<GeeLo>/skills/geelo/SKILL.md`）。
+
+- **Claude Code**：可以直接用 `${CLAUDE_PLUGIN_ROOT}`，它会自动展开成绝对路径
+- **Codex / 其他环境**：`${CLAUDE_PLUGIN_ROOT}` **不会展开**。先把 `<GeeLo>` 算成
+  实际绝对路径再执行，**不要把 `${...}` 原样敲进终端**
+- **没装插件、直接 clone 的**：`<GeeLo>` 就是仓库根目录
+
+无论哪种情况，**都不要问用户路径**——你自己能算出来。
 
 ---
 
 ## 第一步：先自检（每个新会话第一次用 GEE 时跑一次）
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/测试台/环境自检.js"
+node "<GeeLo>/测试台/环境自检.js"
 ```
 
 九项逐条报，按结果分三种处理：
@@ -25,32 +34,32 @@ node "${CLAUDE_PLUGIN_ROOT}/测试台/环境自检.js"
 | 结果 | 你怎么做 |
 |---|---|
 | 全部 `[通过]` | **直接开工，别汇报"我检查了环境"** |
-| 缺 `@google/earthengine` | 自己跑 `npm install`（在 `${CLAUDE_PLUGIN_ROOT}/测试台`，约 104 MB），装完继续 |
-| 缺凭据 / 项目 ID 是占位符 | **停下来交给用户**，见下方两条 |
+| 缺 `@google/earthengine` | 自己跑 `npm install`（在 `<GeeLo>/测试台`，约 104 MB），装完继续 |
+| 缺凭据 / 项目 ID 是占位符 | **跑认证**，见下 |
 
-### 缺凭据 —— 你替不了，让用户自己敲
+### 缺凭据或项目 ID —— 跑 `认证.js`，一条命令全解决
 
+```bash
+node "<GeeLo>/测试台/认证.js"
 ```
-pip install earthengine-api
-earthengine authenticate
-```
 
-要开浏览器登录 Google，之后再也不需要 Python。
+它会自动开浏览器 → 用户点一下「允许」→ 凭据自动写好 → 列出他的 Cloud 项目
+→ 自动 `setx EE_PROJECT`。**不需要 Python，不需要用户复制任何东西。**
+
+你要做的：
+
+1. 跑上面这条命令，然后告诉用户「浏览器已经打开了，选你的 Google 账号点『允许』就行」
+2. 它有多个项目、而你不在交互式终端时，它会**把项目清单打出来**。
+   把清单给用户看，问他要哪个，然后：
+   `node "<GeeLo>/测试台/认证.js" --project=<他选的ID>`
+3. 认证完**提醒用户 `EE_PROJECT` 是 `setx` 写的，当前终端读不到**——
+   你后续跑 `跑GEE.js` 时要么新开终端，要么在命令里临时带上
+   `EE_PROJECT=<id>`（bash）/ `$env:EE_PROJECT='<id>';`（PowerShell）
 
 ★ **不要让用户把 `credentials` 的内容贴给你，也不要自己去读它、打印它。**
 你只需要知道文件在不在。
 
-### 项目 ID 还是占位符 —— 让用户设环境变量
-
-```bat
-setx EE_PROJECT ee-他自己的项目id
-```
-
-**用环境变量，不要改 `配置.txt`**——那个文件在插件目录里，`/plugin update` 会冲掉。
-项目 ID 在哪看：`code.earthengine.google.com` 右上角项目选择器，
-或 Assets 面板里 `projects/<这里就是>/assets/…`。
-
-设完要**新开一个终端**才生效。
+★ 已经有凭据时它会拒绝覆盖。换账号或凭据失效才加 `--force`（旧的会自动备份）。
 
 ---
 
@@ -59,7 +68,7 @@ setx EE_PROJECT ee-他自己的项目id
 ### 1. 写完必须实跑验证再交付
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/测试台/跑GEE.js" --timeout 900 "<脚本绝对路径>"
+node "<GeeLo>/测试台/跑GEE.js" --timeout 900 "<脚本绝对路径>"
 ```
 
 **不许只做静态审读就说"应该没问题"。** 没跑过的脚本不算交付。
@@ -101,13 +110,13 @@ GEE 算力不是白来的。Debug 阶段**先拿一小块区域、先测一个�
 
 ```bash
 # 跑一个脚本（默认超时 300 秒，重的给 900）
-node "${CLAUDE_PLUGIN_ROOT}/测试台/跑GEE.js" --timeout 900 "<脚本.js>"
+node "<GeeLo>/测试台/跑GEE.js" --timeout 900 "<脚本.js>"
 
 # 跑整个目录
-node "${CLAUDE_PLUGIN_ROOT}/测试台/跑GEE.js" --all "<目录>"
+node "<GeeLo>/测试台/跑GEE.js" --all "<目录>"
 
 # 环境自检
-node "${CLAUDE_PLUGIN_ROOT}/测试台/环境自检.js"
+node "<GeeLo>/测试台/环境自检.js"
 ```
 
 退出码：`0` 无报错 / `1` 有脚本报错 / `2` 启动阶段就失败（依赖、Node 版本、凭据、网络）。
@@ -124,7 +133,7 @@ node "${CLAUDE_PLUGIN_ROOT}/测试台/环境自检.js"
 
 - 探针、临时脚本、中间产物 → **临时目录**
 - 成果脚本 → 当前工作区，**一个成果一个文件**
-- `${CLAUDE_PLUGIN_ROOT}` 里的东西**别改**，那是插件本体
+- `<GeeLo>` 里的东西**别改**，那是插件本体
 
 报告要给证据：说"跑通了"就附上实跑输出；跑不通就说跑不通，别粉饰。
 
@@ -134,15 +143,15 @@ node "${CLAUDE_PLUGIN_ROOT}/测试台/环境自检.js"
 
 用户可能装了「功能二」，能把脚本推进他的 EE 仓库并弹出 Code Editor。
 
-**先确认 `${CLAUDE_PLUGIN_ROOT}/送进编辑器/配置.json` 存在**，不存在就别用，
+**先确认 `<GeeLo>/送进编辑器/配置.json` 存在**，不存在就别用，
 直接把脚本路径交给用户。
 
 ```bash
 # 迭代中：只推送不弹浏览器
-node "${CLAUDE_PLUGIN_ROOT}/送进编辑器/gee-open.js" "<脚本.js>" --no-browser
+node "<GeeLo>/送进编辑器/gee-open.js" "<脚本.js>" --no-browser
 
 # 最终版：真开浏览器
-node "${CLAUDE_PLUGIN_ROOT}/送进编辑器/gee-open.js" "<脚本.js>"
+node "<GeeLo>/送进编辑器/gee-open.js" "<脚本.js>"
 ```
 
 规矩：**必须先跑通且数值检查通过**才允许推；**一个成果只推最终版一次**
@@ -155,11 +164,11 @@ node "${CLAUDE_PLUGIN_ROOT}/送进编辑器/gee-open.js" "<脚本.js>"
 
 | 什么时候 | 读哪份 |
 |---|---|
-| 完整的八条铁律 / 目录地图 | `${CLAUDE_PLUGIN_ROOT}/AGENTS.md` |
-| 测试台报错看不懂、想知道它能查出什么 | `${CLAUDE_PLUGIN_ROOT}/测试台/说明.md` |
-| 为什么本机能跑 GEE（原理） | `${CLAUDE_PLUGIN_ROOT}/测试台/原理.txt` |
-| 右键功能出问题 / 凭据要换发 | `${CLAUDE_PLUGIN_ROOT}/送进编辑器/说明.md` |
-| 一个完整成果长什么样（含两个"跑通但结果错"的记录）| `${CLAUDE_PLUGIN_ROOT}/示例脚本/RSEI_哨兵2_厦门岛.js` |
+| 完整的八条铁律 / 目录地图 | `<GeeLo>/AGENTS.md` |
+| 测试台报错看不懂、想知道它能查出什么 | `<GeeLo>/测试台/说明.md` |
+| 为什么本机能跑 GEE（原理） | `<GeeLo>/测试台/原理.txt` |
+| 右键功能出问题 / 凭据要换发 | `<GeeLo>/送进编辑器/说明.md` |
+| 一个完整成果长什么样（含两个"跑通但结果错"的记录）| `<GeeLo>/示例脚本/RSEI_哨兵2_厦门岛.js` |
 
 **别一上来全读**，按需取。
 

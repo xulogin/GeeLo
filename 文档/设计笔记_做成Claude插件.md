@@ -124,10 +124,11 @@ skill 只需要按它的输出分三种情况处理：
 |---|---|
 | 全部 `[通过]` | 直接开工，不废话，不报告"我检查了环境" |
 | 缺 `@google/earthengine` | **自己跑** `npm install`（在插件目录，约 104 MB），装完继续 |
-| 缺凭据 / 项目 ID 是占位符 | **停下来**，把那两条命令交给用户，等他做完 |
+| 缺凭据 / 项目 ID 是占位符 | 跑 `认证.js`（自动弹浏览器），让用户点一下「允许」（见十二）|
 
 ★ 后两种的分界线是：**能不能在不碰用户账号的前提下做完。**
-`npm install` 能，`earthengine authenticate` 不能——它要开浏览器登录。
+`npm install` 和跑 `认证.js` 都能（认证.js 只是把浏览器弹出来），
+只有「在浏览器里点允许」这一下必须用户自己做。
 AGENTS.md 已明令"不要让用户把 credentials 贴给你，也不要自己去读它"，
 SKILL.md 里必须重申，因为 skill 的使用者可能从没读过 AGENTS.md。
 
@@ -207,7 +208,7 @@ GeeLo —— 用 AI 开发 GEE 的免干预工作流
 |---|---|---|
 | `git clone` + 找目录 | 要 | 免 |
 | 双击 `安装.bat` 跑 `npm install` | 要 | 免（skill 自检发现缺依赖就装）|
-| `earthengine authenticate` | 要 | **要，躲不掉** |
+| 拿凭据 | 要装 Python | 免（认证.js 自动弹浏览器，点一下就行）|
 | 填项目 ID | 改 `配置.txt` | `setx EE_PROJECT`，skill 带着做 |
 | `new-workspace.js` 埋指路牌 | 每个工作文件夹一次 | 免（skill 全局可用）|
 
@@ -222,7 +223,7 @@ GeeLo —— 用 AI 开发 GEE 的免干预工作流
 
 | | 指路牌（`new-workspace.js`）| skill |
 |---|---|---|
-| 覆盖 | 所有 AI 工具 | 只有 Claude Code |
+| 覆盖 | 所有 AI 工具 | Claude Code 与 Codex |
 | 生效范围 | 埋过牌的那个文件夹 | 全局任意目录 |
 | 额外好处 | 可以手工加**本工作区特有的约定** | 无 |
 
@@ -250,15 +251,107 @@ skill 提供工具知识，指路牌提供项目知识。
 
 | 局限 | 影响 | 缓解 |
 |---|---|---|
-| skill 是 Claude Code 生态特性 | Codex / Cursor / Gemini CLI 用不上 | AGENTS.md + 指路牌那条路原样保留 |
-| `earthengine authenticate` 躲不掉 | 装到一半要人工介入 | skill 在自检失败时把命令直接递上，不用查文档 |
+| skill 只在 Claude Code / Codex 生效 | Cursor / Cline / Copilot 用不上 | AGENTS.md + 指路牌那条路原样保留（见十一）|
+| 认证要用户在浏览器点一次「允许」| 装到一半要人工介入一次 | 已压到最小：认证.js 自动弹浏览器，不用装 Python、不用复制（见十二）|
 | 依赖装在插件目录 | `/plugin update` 换版本目录后要重装 104 MB | skill 自检自动兜住，用户无感 |
 | `配置.txt` 会被更新覆盖 | 填在文件里的项目 ID 会丢 | 引导用 `EE_PROJECT` 环境变量 |
 | 仍然只支持 Windows | 非 Windows 用户装了也用不了 | 插件描述里写明；这是工具本身的限制，不是插件层的 |
 
 ---
 
-# 十一、一句话总结
+# 十一、后来发现：Codex 也能装，而且**读的是同一份清单**
+
+本文前面写"skill 是 Claude Code 生态特性"，这条**已经过时了**，如实更正。
+
+Codex 有自己的插件系统（`codex plugin marketplace add` / `codex plugin add`），
+而且实测发现：**它直接读 `.claude-plugin/marketplace.json`**——不用另写一份。
+只需要补一个 `.codex-plugin/plugin.json`，里面用 `"skills": "./skills/"`
+指向同一个 skills 目录。
+
+```
+codex plugin marketplace add xulogin/GeeLo
+codex plugin add geelo@geelo
+```
+
+实测（`codex exec` 问它）：
+
+> 有，当前可用 `geelo:geelo` skill。
+> 写完 GEE 脚本后，必须用 GeeLo 连接真实 Earth Engine 服务器实际运行一遍。
+
+它不但看得见 skill，还能准确复述铁律 1。
+
+★ 一个**必须处理**的坑：`${CLAUDE_PLUGIN_ROOT}` 在 Codex 里**不会展开**。
+所以 SKILL.md 里不能再依赖那个变量，改成写 `<GeeLo>`，并在开头交代它怎么算出来：
+「本文件所在目录的上两级」。AI 总是知道自己读的文件在哪，所以这个判据到哪都成立。
+**任何依赖单一厂商特性的写法，都要配一条通用的退路**——这条在
+`设计笔记_上下文注入.md` 第四节就写过，这里又验证了一次。
+
+于是覆盖面变成：
+
+| 工具 | 怎么装 | 任意文件夹可用 |
+|---|---|---|
+| Claude Code | 两条命令 | ✅ |
+| Codex | 两条命令 | ✅ |
+| Gemini CLI | clone + `全局安装.js` | ✅ |
+| Cursor / Cline | clone + 粘一段进设置 | ✅ |
+| Copilot | clone + `new-workspace.js` | 只在埋过牌的仓库 |
+
+---
+
+# 十二、干掉 Python：`测试台\认证.js`
+
+原来的安装卡在这三条命令上：
+
+```
+pip install earthengine-api
+earthengine authenticate
+setx EE_PROJECT ee-xxx
+```
+
+为了拿一次凭据装一整套 Python，这是整个安装流程里最劝退的一步。
+
+**拆开看，`earthengine authenticate` 只干两件事**：①开浏览器拿一个 authorization
+code ②拿它换 refresh_token 存进凭据文件。而第②步 `跑GEE.js` 早就自己实现了——
+它每次启动都在用 refresh_token 换 access_token，用的就是 earthengine 命令行那个
+**公开 client**（`跑GEE.js:64`）。
+
+**所以只差第①步。** 补上它，Python 就整个不需要了。
+
+★ 而且能比"复制授权码"更省一步：凭据文件里的 `redirect_uri` 是
+`http://localhost:8085`——这个 client 本来就走**本地回环**。在本机起一个一次性
+小服务器接住回调，用户点完「允许」浏览器自己跳回来，**什么都不用复制**。
+
+顺带把项目 ID 也解决了：认证时申请的 scope 里有 `cloud-platform`，
+所以拿到 token 之后可以直接列出用户的 Cloud 项目让他选，然后替他 `setx EE_PROJECT`。
+
+最终安装流程：
+
+```
+两条命令装插件 → 提需求 → 浏览器自动弹出 → 点「允许」→ 完事
+```
+
+## 实现上踩到的两个点
+
+**① 未处理拒绝会杀进程。** `等授权()` 返回的 Promise 如果在调用者 `await` 之前
+就被 reject（用户点了「取消」），Node 15+ 会把它当成未处理拒绝**直接终止进程**。
+解法是在服务器起来的同时就把 Promise 建好，并挂一个空 `catch` 兜底——
+它处理的是**派生**的那个 Promise，原来那个照样把错误交给真正 await 它的人。
+这个 bug 是写测试时抓到的，不是想出来的。
+
+**② 已有凭据默认不覆盖。** 凭据等同于账号钥匙，误覆盖的代价太大。
+默认拒绝，要覆盖得显式 `--force`，而且旧的先备份。
+（同 `new-workspace.js` 的 `--force` 设计，理由见另一份设计笔记 5.4。）
+
+## 刻意没做
+
+- **不自己注册 OAuth client**。复用 earthengine 命令行那个公开 client，
+  产出的凭据文件与 `earthengine authenticate` **完全兼容**，两边可以互换——
+  用户想回去用 Python 那套，或者本来就有凭据，都不受影响。
+  自己注册一个的话要走 Google 的应用验证，否则用户会看到「未验证的应用」警告。
+
+---
+
+# 十三、一句话总结
 
 **AGENTS.md 是权威源，skill 是给 Claude 用户的一条捷径入口——
 捷径可以更短，但不能另说一套。**

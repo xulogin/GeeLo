@@ -68,7 +68,9 @@ const CLIENT_SECRET = 'RUP0RZ6e0pPhDzsqIJ7KlNd1';
 function getAccessToken() {
   const credPath = path.join(os.homedir(), '.config', 'earthengine', 'credentials');
   if (!fs.existsSync(credPath)) {
-    throw new Error('找不到凭据 ' + credPath + '\n请先在命令行跑一次： earthengine authenticate');
+    throw new Error('找不到凭据 ' + credPath
+      + '\n先跑一次认证（自动开浏览器，点「允许」就完事，不用装 Python）：'
+      + '\n  node "' + path.join(__dirname, '认证.js') + '"');
   }
   const refresh = JSON.parse(fs.readFileSync(credPath, 'utf8')).refresh_token;
   const body = querystring.stringify({
@@ -374,7 +376,7 @@ function runOne(file, timeoutSec) {
     console.error('→ Node 版本太老（当前 v' + process.versions.node + '）。');
     console.error('  依赖 https-proxy-agent 是纯 ESM 包，需要 Node 20.19+ / 22 LTS 以上。');
   } else if (/invalid_grant/.test(m)) {
-    console.error('→ 凭据失效了。重新登录一次：  earthengine authenticate');
+    console.error('→ 凭据失效了。重新认证：  node "' + path.join(__dirname, '认证.js') + '" --force');
   } else if (/invalid_client/.test(m)) {
     console.error('→ CLIENT_ID/SECRET 不对。它们是 earthengine-api 的公开值，');
     console.error('  正常不用改；若被误改过，见《说明.md》坑 3。');

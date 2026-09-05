@@ -1,0 +1,40 @@
+{
+  "name": "geelo",
+  "version": "1.0.0",
+  "description": "用 AI 开发 GEE 的免干预工作流：AI 写完 Google Earth Engine 脚本，自己在本机连真服务器跑一遍，看服务端报什么、数值合不合理，改到通了再交给你。仅支持 Windows，需要 Node.js 20.19+ 和一个 GEE 账号。",
+  "author": {
+    "name": "Haifeng Xu",
+    "email": "xuhf@swfu.edu.cn",
+    "url": "https://github.com/xulogin"
+  },
+  "homepage": "https://github.com/xulogin/GeeLo",
+  "repository": "https://github.com/xulogin/GeeLo",
+  "license": "MIT",
+  "keywords": [
+    "gee",
+    "google-earth-engine",
+    "remote-sensing",
+    "geospatial",
+    "rsei",
+    "ndvi",
+    "遥感"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "GeeLo",
+    "shortDescription": "让 AI 自己把 GEE 脚本在本机连真服务器跑通再交付",
+    "longDescription": "AI 写 GEE 代码的水平早就够用，问题是它写完不知道自己写得对不对——波段名、空集合、归约器输入个数这些只有真连服务器才知道。GeeLo 把那一步搬到本机：AI 自己跑、自己看报错、自己改，跑通并核对数值之后再交付。仅支持 Windows。",
+    "developerName": "Haifeng Xu",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "帮我写个基于哨兵二号求 RSEI 的脚本，研究区小一点",
+      "这个 GEE 脚本报错了，帮我调通"
+    ],
+    "websiteURL": "https://github.com/xulogin/GeeLo"
+  }
+}

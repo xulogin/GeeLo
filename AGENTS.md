@@ -146,37 +146,36 @@ npm install
 
 装不上多半是 npm 要走代理：`npm config set proxy http://127.0.0.1:<端口>`。
 
-### ② 「凭据文件不存在」
+### ② 「凭据文件不存在」或 ③ 「项目 ID 还是占位符」
 
-这一步**你替用户跑不了**（要开浏览器登录 Google），必须让他自己在命令行敲：
+这两条**同一条命令解决**，你可以直接跑：
 
 ```
-pip install earthengine-api
-earthengine authenticate
+node "<GeeLo>\测试台\认证.js"
 ```
 
-登完会在 `%USERPROFILE%\.config\earthengine\credentials` 留下 `refresh_token`。
-**之后再也不需要 Python。**
+它做三件事：自动开浏览器让用户点「允许」→ 把凭据写进
+`%USERPROFILE%\.config\earthengine\credentials` → 列出他的 Cloud 项目并
+自动 `setx EE_PROJECT`。
+
+**不需要 Python。** 原来那套 `pip install earthengine-api` + `earthengine authenticate`
+已经不需要了——认证.js 用的是同一个公开 client，产出的凭据文件两边完全兼容。
+
+配合要点：
+
+- 跑完告诉用户「浏览器已经打开了，选账号点『允许』就行」，**不用他复制任何东西**
+- 他有多个项目而你不在交互式终端时，认证.js 会**把清单打出来**。
+  拿给用户选，然后 `node "<GeeLo>\测试台\认证.js" --project=<他选的ID>`
+- `EE_PROJECT` 是 `setx` 写的，**当前终端读不到**，后续命令要新开终端
+  或临时带上环境变量
+- 已有凭据时它拒绝覆盖；换账号 / 凭据失效才加 `--force`（旧的自动备份）
 
 ★ **不要让用户把 `credentials` 的内容贴给你**，也不要自己去读它、打印它。
 你只需要知道"这个文件在不在"，`fs.existsSync` 就够了。
 
-### ③ 「项目 ID 还是占位符」
-
-发布版 `测试台\配置.txt` 里写的是 `ee-your-project-id`，**必须换成用户自己的**。
-
-问用户要，或者告诉他去哪看：`code.earthengine.google.com` 右上角的项目选择器，
-或 Assets 面板里 `projects/<这里就是>/assets/…`。拿到之后你可以直接替他改：
-
-```
-项目ID = 他给你的那个
-```
-
-★ `配置.txt` 是 **GBK 编码**的，改的时候别把它整个重写成 UTF-8——
-虽然解析器两种都认（键名判据只看 ASCII 的 `ID` 两个字母），但别人再用记事本
-打开就会看到乱码。只改那一行的值最安全。
-
-★ 也可以不改文件，用环境变量临时覆盖：`set EE_PROJECT=<项目ID>`。
+★ 也可以手改 `测试台\配置.txt` 里的项目 ID，但**优先用 `EE_PROJECT` 环境变量**——
+装成插件时 `配置.txt` 在插件目录里，更新插件会把它冲掉。
+真要改那个文件的话注意它是 **GBK 编码**，只改那一行的值，别整个重写成 UTF-8。
 
 ### 全部通过之后，跑一次演示确认真的通了
 

@@ -132,16 +132,17 @@ const credPath = path.join(os.homedir(), '.config', 'earthengine', 'credentials'
 let refresh = null;
 if (!fs.existsSync(credPath)) {
   bad('凭据文件', '不存在：' + credPath,
-    '在命令行跑一次（会开浏览器登录，登完就有了）：\n'
-    + '  earthengine authenticate\n'
-    + '若没有 earthengine 命令，先：pip install earthengine-api');
+    '跑一次认证（会自动开浏览器，点「允许」就完事，不用装 Python）：\n'
+    + '  node "' + path.join(__dirname, '认证.js') + '"');
 } else {
   try {
     refresh = JSON.parse(fs.readFileSync(credPath, 'utf8')).refresh_token;
     if (refresh) ok('凭据文件', credPath);
-    else bad('凭据文件', '里面没有 refresh_token', '重新跑：earthengine authenticate');
+    else bad('凭据文件', '里面没有 refresh_token',
+      '重新认证：node "' + path.join(__dirname, '认证.js') + '" --force');
   } catch (e) {
-    bad('凭据文件', '读不出来：' + e.message, '删掉它，重新跑：earthengine authenticate');
+    bad('凭据文件', '读不出来：' + e.message,
+      '重新认证（旧的会自动备份）：node "' + path.join(__dirname, '认证.js') + '" --force');
   }
 }
 
@@ -234,7 +235,7 @@ function probe(host) {
         global.__TOKEN__ = j;
       } else if (j.error === 'invalid_grant') {
         bad('换取令牌', 'refresh_token 已失效',
-          '重新登录一次：earthengine authenticate');
+          '重新认证一次：node "' + path.join(__dirname, '认证.js') + '" --force');
       } else if (j.error === 'invalid_client') {
         bad('换取令牌', 'CLIENT_ID/SECRET 不对',
           '从已装的 Python 包读真值，填回 跑GEE.js 顶部：\n'

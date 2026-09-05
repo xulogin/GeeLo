@@ -43,36 +43,31 @@ AI：（一整份 GEE JavaScript，注释齐全）
 
 ## 怎么装
 
-### ① Claude Code 用户（两条命令）
+### ① Claude Code / Codex（各两条命令）
 
 ```
-/plugin marketplace add xulogin/GeeLo
-/plugin install geelo@geelo
+Claude Code:   /plugin marketplace add xulogin/GeeLo
+               /plugin install geelo@geelo
+
+Codex:         codex plugin marketplace add xulogin/GeeLo
+               codex plugin add geelo@geelo
 ```
 
-然后随便找个文件夹提需求就行。缺什么 skill 会自己检查、自己装依赖，
-只有下面这一步它替不了你——要开浏览器登录 Google：
+**装完直接提需求就行。** 第一次用时 AI 会自己跑环境检查、自己装依赖；
+需要认证时**浏览器会自动弹出来，你点一下「允许」就完事**——
+不用装 Python，不用复制令牌，项目 ID 也会自动配好。
 
-```bat
-pip install earthengine-api
-earthengine authenticate
-setx EE_PROJECT ee-你自己的项目id
-```
-
-（项目 ID 在 `code.earthengine.google.com` 右上角的项目选择器里看。设完新开一个终端。）
-
-### ② 其他 AI 工具（手动安装）
+### ② Gemini CLI / Cursor / Cline（没有插件市场）
 
 ```bat
 git clone https://github.com/xulogin/GeeLo.git
 cd GeeLo
 ```
 
-1. 双击 `测试台\安装.bat`　　　　查 Node → 装依赖（约 104 MB）→ 跑自检
-2. 拿一次 GEE 凭据（同上那两条 `pip` / `earthengine authenticate`）
-3. 打开 `测试台\配置.txt`，把 `项目ID = ee-your-project-id` 换成你自己的
-4. 双击 `测试台\环境自检.bat`，全部 `[通过]` 就装好了
-5. 双击 `测试台\跑一个试试.bat` 看演示
+1. 双击 `测试台\安装.bat`　　　查 Node → 装依赖（约 104 MB）
+2. 双击 `测试台\认证.bat`　　　浏览器弹出 → 点「允许」→ 凭据和项目 ID 自动配好
+3. 双击 `测试台\环境自检.bat`　全部 `[通过]` 就装好了
+4. `node 全局安装.js`　　　　　装全局指路牌，之后**任意文件夹随开随用**
 
 **装不上？** 把 `环境自检.bat` 的完整输出丢给你的 AI 助手——它会逐项告诉你缺什么、怎么补。
 
@@ -85,32 +80,44 @@ cd GeeLo
 
 ## 怎么用
 
-**Claude Code**：任意文件夹里直接提需求。
+**你只要说话。**
 
 > "帮我写个基于哨兵二号求厦门岛 RSEI 的脚本，研究区小一点"
 
-**其他工具**：在 GeeLo 目录里开 AI 助手，或先给你的工作文件夹放一张指路牌——
+剩下的它自己干：写第一版 → 在本机连真服务器跑 → 看服务端报什么 → 改 →
+再跑 → 核对数值合不合理 → 才交给你。**中间那些命令都是 AI 自己敲的，你一条都不用输。**
+
+Claude Code 里还可以用斜杠命令：
+
+```
+/geelo 帮我算南宁 2019—2024 的 RSEI     带需求 = 直接开工
+/geelo                                   不带参数 = 体检，告诉你缺什么
+```
+
+**在哪个文件夹用**：装了插件的（Claude Code / Codex）任意文件夹都行。
+跑过 `全局安装.js` 的（Gemini CLI）也是任意文件夹。
+都没有的话，给某个工作文件夹单独放一张指路牌：
 
 ```bat
 node "<GeeLo绝对路径>\new-workspace.js" "D:\某个项目文件夹"
 ```
 
-它会在那边写三个小文件（`AGENTS.md` / `CLAUDE.md` / `GEMINI.md`），
-内容是"工具在←这个路径，规矩见那边"。GeeLo 目录一个字都不会被改。
+**安全边界**：`Export.*` 只校验参数不真导出（不烧配额、不写你的 Drive/Asset）；
+脚本在 `vm` 沙箱里跑；全程只读。凭据在你的用户目录里，**不在这个仓库**——
+克隆或分享本仓库不会泄露账号。
 
-**自己手动跑测试台**：
+---
+
+### 附：手动跑测试台（一般用不到，AI 自己会跑）
 
 ```bat
 node 测试台\跑GEE.js --timeout 900 "你的脚本.js"     :: 跑一个
 node 测试台\跑GEE.js --all "某个目录"                :: 跑一整个目录
+node 测试台\认证.js --force                          :: 换账号 / 凭据失效了
 ```
 
 ⚠ 不要直接 `node 你的GEE脚本.js` —— 会报 `ee is not defined`。
 `ee` / `print` / `Map` / `Export` 都是运行环境提供的，`跑GEE.js` 负责注入它们。
-
-**安全边界**：`Export.*` 只校验参数不真导出（不烧配额、不写你的 Drive/Asset）；
-脚本在 `vm` 沙箱里跑；全程只读。凭据在你的用户目录里，**不在这个仓库**——
-克隆或分享本仓库不会泄露账号。
 
 ---
 
