@@ -1,0 +1,15 @@
+{
+  "name": "geelo",
+  "owner": {
+    "name": "Haifeng Xu",
+    "url": "https://github.com/xulogin"
+  },
+  "plugins": [
+    {
+      "name": "geelo",
+      "source": "./",
+      "description": "AI 写完 Google Earth Engine 脚本后，自己在本机连真服务器跑通、看数值合不合理，再交付。仅支持 Windows。",
+      "version": "1.0.0"
+    }
+  ]
+}

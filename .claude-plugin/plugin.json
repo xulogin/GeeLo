@@ -1,0 +1,26 @@
+{
+  "name": "geelo",
+  "version": "1.0.0",
+  "description": "用 AI 开发 GEE 的免干预工作流：AI 写完 Google Earth Engine 脚本，自己在本机连真服务器跑一遍，看服务端报什么、数值合不合理，改到通了再交给你。仅支持 Windows，需要 Node.js 20.19+ 和一个 GEE 账号。",
+  "author": {
+    "name": "Haifeng Xu",
+    "email": "xuhf@swfu.edu.cn",
+    "url": "https://github.com/xulogin"
+  },
+  "homepage": "https://github.com/xulogin/GeeLo",
+  "repository": "https://github.com/xulogin/GeeLo",
+  "license": "MIT",
+  "keywords": [
+    "gee",
+    "google-earth-engine",
+    "earth-engine",
+    "remote-sensing",
+    "geospatial",
+    "rsei",
+    "ndvi",
+    "sentinel",
+    "landsat",
+    "遥感",
+    "windows"
+  ]
+}
