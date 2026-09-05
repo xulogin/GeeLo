@@ -57,6 +57,39 @@ Codex:         codex plugin marketplace add xulogin/GeeLo
 需要认证时**浏览器会自动弹出来，你点一下「允许」就完事**——
 不用装 Python，不用复制令牌，项目 ID 也会自动配好。
 
+### 装不上？（国内网络几乎都会碰到）
+
+**先明确一点**：GeeLo 本来就要连 `earthengine.googleapis.com`。
+所以**连不上 GitHub 的机器，也一定连不上 Earth Engine**——
+代理不是为装插件额外加的负担，它是这个工具的前提。先把代理弄通，装插件自然就通了。
+
+| 报错 | 原因 | 怎么办 |
+|---|---|---|
+| `port 22: Connection timed out`　`SSH authentication failed` | `owner/repo` 简写被解析成 SSH，22 端口被封 | 换 HTTPS 全地址：`/plugin marketplace add https://github.com/xulogin/GeeLo.git` |
+| `certificate ... not trusted`　`schannel` 证书错误 | **DNS 被污染**，github.com 被解析到假 IP（校园网常见）| 开代理，见下 |
+| 换了 HTTPS 还是走 SSH | 这台机器配了重写规则 | `git config --global --get-regexp "url.*insteadOf"` 查出来，`git config --global --unset url."git@github.com:".insteadOf` 去掉 |
+
+**开着代理软件，然后给 git 也配上**（`/plugin marketplace add` 底层就是 `git clone`）：
+
+```bat
+git config --global http.proxy http://127.0.0.1:7890
+git config --global https.proxy http://127.0.0.1:7890
+```
+
+端口在你的代理软件设置里看：Clash 常见 `7890`，v2rayN 常见 `10808`（找「HTTP 代理端口」或「混合端口」）。
+装完想取消：`git config --global --unset http.proxy`（GeeLo 自己跑的时候会重新探测，不依赖这个）。
+
+★ **绝对不要用 `git config http.sslVerify false` 绕过证书错误。**
+DNS 被污染时那等于把你的凭据和代码明文交给中间人。
+
+**实在连不上 GitHub**：让能上网的人把整个 `GeeLo` 目录拷给你（U 盘、网盘都行），
+然后用**本地路径**装，效果完全一样：
+
+```
+/plugin marketplace add D:\你放GeeLo的路径
+/plugin install geelo@geelo
+```
+
 ### ② Gemini CLI / Cursor / Cline（没有插件市场）
 
 ```bat
