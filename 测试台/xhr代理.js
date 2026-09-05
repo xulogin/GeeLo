@@ -32,18 +32,19 @@ function currentProxy() {
 function makeAgent() {
   const PROXY = currentProxy();
   if (!PROXY) return undefined;
-  const { HttpsProxyAgent } = require('https-proxy-agent');
-  return new HttpsProxyAgent(PROXY);
+  return require('./代理agent.js').makeAgent(PROXY);
 }
 
 // 子进程里跑的代码：发一次请求，把结果按 JSON 吐到 stdout
+// ★ makeAgent 的逻辑由 代理agent.js 生成后内联进来 —— 子进程 require 不到相对路径，
+//   而且**这里必须和主进程用同一套协议判断**，否则会出现
+//   「异步请求走 SOCKS 通了、同步的 getInfo() 还在按 HTTP 发」这种半通不通的怪状态。
 const CHILD = `
 const https=require('https'), http=require('http');
+${require('./代理agent.js').子进程代码片段()}
 let buf=''; process.stdin.on('data',d=>buf+=d); process.stdin.on('end',()=>{
   const o=JSON.parse(buf);
-  let agent;
-  if(o.proxy){ const {HttpsProxyAgent}=require(${JSON.stringify(require.resolve('https-proxy-agent'))});
-               agent=new HttpsProxyAgent(o.proxy); }
+  const agent = makeAgent(o.proxy);
   const u=new URL(o.url);
   const mod = u.protocol==='https:' ? https : http;
   const req=mod.request({hostname:u.hostname, port:u.port||undefined,

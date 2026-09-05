@@ -73,8 +73,7 @@ function agent() {
          || process.env.HTTP_PROXY || process.env.http_proxy;
   if (!p) { return undefined; }
   try {
-    const { HttpsProxyAgent } = require('https-proxy-agent');
-    return new HttpsProxyAgent(p);
+    return require('./代理agent.js').makeAgent(p);
   } catch (e) { return undefined; }
 }
 

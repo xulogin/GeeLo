@@ -82,14 +82,7 @@ function getAccessToken() {
       hostname: 'oauth2.googleapis.com', path: '/token', method: 'POST',
       // ★ 现建代理 agent：代理是 main() 里探测出来、写进 process.env 的，
       //   不能用 https.globalAgent（那是没打过补丁的默认 agent，会直连然后超时）。
-      agent: (function () {
-        const P = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-        if (!P) { return undefined; }
-        try {
-          const { HttpsProxyAgent } = require('https-proxy-agent');
-          return new HttpsProxyAgent(P);
-        } catch (e) { return undefined; }
-      })(),
+      agent: require('./代理agent.js').agentFromEnv(),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded',
                  'Content-Length': Buffer.byteLength(body) },
     }, res => {
@@ -323,7 +316,7 @@ function runOne(file, timeoutSec) {
 
   if (_proj.warn) {
     console.log('⚠ ' + _proj.warn);
-    console.log('  （打开本目录的 配置.txt 改；或先双击 环境自检.bat 逐项检查）');
+    console.log('  （设项目 ID：node "' + path.join(__dirname, '认证.js') + '" --project=<你的项目ID>）');
   }
   // ★ 先找一条能通 Google 的路
   const { readProxy } = require('./配置读取.js');
@@ -386,14 +379,14 @@ function runOne(file, timeoutSec) {
     if (PROJECT === require('./配置读取.js').PLACEHOLDER) {
       console.error('  这是发布时的**占位符**，你还没填自己的项目 ID。');
     }
-    console.error('  打开本目录的 配置.txt，把「项目ID=」换成你自己的项目。');
+    console.error('  设项目 ID：node "' + path.join(__dirname, '认证.js') + '" --project=<你的项目ID>');
     console.error('  在哪看：code.earthengine.google.com 右上角的项目选择器。');
   } else if (/not registered|not signed up/i.test(m)) {
     console.error('→ 项目「' + PROJECT + '」没注册 Earth Engine。');
-    console.error('  打开本目录的 配置.txt，把「项目ID=」换成你自己已注册的项目。');
+    console.error('  设项目 ID：node "' + path.join(__dirname, '认证.js') + '" --project=<你的项目ID>');
   } else if (/permission/i.test(m)) {
     console.error('→ 对项目「' + PROJECT + '」没权限，多半这不是你的项目。');
-    console.error('  打开本目录的 配置.txt 换成自己的项目 ID。');
+    console.error('  设项目 ID：node "' + path.join(__dirname, '认证.js') + '" --project=<你的项目ID>');
   } else if (/ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|Failed to contact/i.test(m)) {
     console.error('→ 网络不通。这台机器访问 Google 可能要走代理：');
     console.error('    set HTTPS_PROXY=http://127.0.0.1:端口');

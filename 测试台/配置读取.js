@@ -36,11 +36,18 @@ const KEY_PATTERNS = [
 //   而那句报错看起来像 GEE 的问题，不像"你忘了填配置"。
 const PLACEHOLDER = 'ee-your-project-id';
 
+// ★ 这里**首推环境变量，不要教人去改 配置.txt**。两个理由，都踩过：
+//   ① 配置.txt 是 GBK 编码。别人用 PowerShell 按 ANSI 读写去改那一行，报过错；
+//      改坏了还会把整份文件的中文注释变成乱码。
+//   ② 装成插件时 配置.txt 在插件目录里，/plugin update 会把它整个冲掉。
+//   认证.js --project=<id> 内部就是 setx，不碰任何文件，两个问题一起没有。
 const PLACEHOLDER_WARN =
   '项目 ID 还是发布时的占位符「' + PLACEHOLDER + '」，**你还没填自己的**。\n'
-  + '打开 配置.txt，把「项目ID = 」后面换成你自己的 GEE 项目。\n'
-  + '在哪看：code.earthengine.google.com 右上角的项目选择器，'
-  + '或 Assets 面板里 projects/<这里就是>/assets/…';
+  + '最省事的办法（不用编辑任何文件）：\n'
+  + '  node "' + path.join(__dirname, '认证.js') + '" --project=<你的项目ID>\n'
+  + '在哪看项目 ID：code.earthengine.google.com 右上角的项目选择器，'
+  + '或 Assets 面板里 projects/<这里就是>/assets/…\n'
+  + '（也可以自己 setx EE_PROJECT <项目ID>，效果一样，都要新开终端才生效。）';
 
 function readProject(dir, fallback) {
   dir = dir || __dirname;

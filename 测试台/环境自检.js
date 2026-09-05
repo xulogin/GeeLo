@@ -86,6 +86,14 @@ try {
   bad('@google/earthengine', '没装', '在本目录（' + HERE + '）执行：\n  npm install');
 }
 try {
+  require('socks-proxy-agent');
+  ok('socks-proxy-agent', '已装（SOCKS 代理要用）');
+} catch (e) {
+  bad('socks-proxy-agent', '没装',
+    '在本目录执行：npm install\n'
+    + '很多人的代理只开了 SOCKS 端口（如 v2rayN 默认的 10808），缺它就连不上。');
+}
+try {
   require('https-proxy-agent');
   ok('https-proxy-agent', '已装');
 } catch (e) {
@@ -106,6 +114,7 @@ head(3, '本目录文件是否齐全');
 //   （2026-08-18 就漏了 代理探测.js，已补。以后新增依赖文件记得同步加进来。）
 [['跑GEE.js', '主程序'], ['xhr代理.js', '代理版 XHR'],
  ['代理探测.js', '代理自动探测（第 6 项要用）'],
+ ['代理agent.js', '代理 agent 工厂（http/socks 共用一份）'],
  ['配置读取.js', '配置解析（与本自检共用）'], ['配置.txt', '项目 ID 配置'],
  ['说明.md', '文档'], ['原理.txt', '原理说明'], ['package.json', '依赖清单'],
  ['示例', '示例脚本目录']].forEach(([f, d]) => {
@@ -157,8 +166,7 @@ function agent() {
   const P = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
   if (!P) { return undefined; }
   try {
-    const { HttpsProxyAgent } = require('https-proxy-agent');
-    return new HttpsProxyAgent(P);
+    return require(path.join(HERE, '代理agent.js')).makeAgent(P);
   } catch (e) { return undefined; }
 }
 
