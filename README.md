@@ -30,12 +30,13 @@ AI：（一整份 GEE JavaScript，注释齐全）
 
 规矩写在通用的 `AGENTS.md` 里，**不绑定任何一家**：
 
-| 工具 | 怎么生效 |
-|---|---|
-| **Claude Code** | 装插件即可，任意文件夹随开随用（见下方安装 ①） |
-| Codex / Cursor / Cline / 通义灵码 / Zed | 自动读 `AGENTS.md` |
-| Gemini CLI | 自动读 `GEMINI.md` → 指回 `AGENTS.md` |
-| GitHub Copilot | 自动读 `.github/copilot-instructions.md` |
+| 工具 | 怎么生效 | 任意文件夹随开随用 |
+|---|---|---|
+| **Claude Code** | 插件市场，两条命令（安装 ①）| ✅ |
+| **Codex** | 插件市场，两条命令（安装 ①）| ✅ |
+| Gemini CLI | `全局安装.js` 写全局指路牌（安装 ②）| ✅ |
+| Cursor / Cline | 粘一段进全局规则（`全局安装.js` 会打印给你）| ✅ |
+| 通义灵码 / Zed / GitHub Copilot | 自动读 `AGENTS.md` / `.github/copilot-instructions.md` | 埋过指路牌的目录 |
 
 **环境要求**：Windows、Node.js 20.19+（推荐 22 LTS）、一个 GEE 账号和已注册的 Cloud 项目。
 
@@ -46,10 +47,10 @@ AI：（一整份 GEE JavaScript，注释齐全）
 ### ① Claude Code / Codex（各两条命令）
 
 ```
-Claude Code:   /plugin marketplace add xulogin/GeeLo
+Claude Code:   /plugin marketplace add https://github.com/xulogin/GeeLo.git
                /plugin install geelo@geelo
 
-Codex:         codex plugin marketplace add xulogin/GeeLo
+Codex:         codex plugin marketplace add https://github.com/xulogin/GeeLo.git
                codex plugin add geelo@geelo
 ```
 

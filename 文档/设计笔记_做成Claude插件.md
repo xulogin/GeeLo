@@ -67,7 +67,7 @@ GeeLo/
 用户侧两条命令：
 
 ```
-/plugin marketplace add xulogin/GeeLo
+/plugin marketplace add https://github.com/xulogin/GeeLo.git
 /plugin install geelo
 ```
 
@@ -238,7 +238,7 @@ skill 提供工具知识，指路牌提供项目知识。
 
 # 九、验收标准
 
-- [ ] `/plugin marketplace add xulogin/GeeLo` + `/plugin install geelo` 两条命令装完
+- [ ] `/plugin marketplace add https://github.com/xulogin/GeeLo.git` + `/plugin install geelo@geelo` 两条命令装完
 - [ ] 在一个**跟 GeeLo 毫无关系的空文件夹**里说"帮我写个厦门岛 NDVI 脚本"，
       Claude 自动加载 skill、自己找到 `跑GEE.js`、跑通再交付——**全程用户没输过任何路径**
 - [ ] 环境没配好时，skill 能把用户带到全部 `[通过]`，且**没有**要求用户贴凭据内容
@@ -269,7 +269,7 @@ Codex 有自己的插件系统（`codex plugin marketplace add` / `codex plugin 
 指向同一个 skills 目录。
 
 ```
-codex plugin marketplace add xulogin/GeeLo
+codex plugin marketplace add https://github.com/xulogin/GeeLo.git
 codex plugin add geelo@geelo
 ```
 
