@@ -171,6 +171,6 @@ node 测试台\认证.js --force                          :: 换账号 / 凭据�
 
 ## 作者与许可
 
-**Haifeng Xu**　<xuhf@swfu.edu.cn>　·　**MIT**（见 `LICENSE`）
+**Haifeng Xu**　<hifengxu@gmail.com>　·　**MIT**（见 `LICENSE`）
 
 用它做出了东西、或者踩到了坑，欢迎开 Issue。
